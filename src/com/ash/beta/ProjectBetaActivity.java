@@ -18,7 +18,7 @@ package com.ash.beta;
  *  
  *  You should have received a copy of the GNU General Public License
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
-
+ *  
  */
 
 
@@ -122,33 +122,26 @@ public class ProjectBetaActivity extends Activity {
 	        button2.setOnClickListener(new View.OnClickListener() {		
 				@Override
 				public void onClick(View v) {
-				
-
-					tv6.setText("Starting. ");
-					
+					clearTV();
+					tv1.setText("Starting. ");
 					Command command = new Command(Command.GetDeviceInfo, session);
-
-					
 					mConnection.bulkTransfer(mEndpointBulkOut, command.data , command.length , 1000);
-					//session.open();
-					tv6.append(" Sent:");
+					tv1.append(" Sent:");
 					
 					StringBuffer hexString1 = new StringBuffer(); 
 					for (int i=0;i<command.data.length;i++) { 
 					    hexString1.append(Integer.toHexString(0xFF & command.data[i])); 
 					    } 
-					tv6.append(hexString1);
-					
-					byte buf[] = new byte[inMaxPS];
-					
+					tv1.append(hexString1);
+					byte buf[] = new byte[inMaxPS];					
 					mConnection.bulkTransfer(mEndpointBulkIn, buf ,inMaxPS , 1000);
 					
-					tv6.append(" Receiving:");
+					tv1.append(" Receiving:");
 					StringBuffer hexString = new StringBuffer(); 
 					for (int i=0;i<buf.length;i++) { 
 					    hexString.append(Integer.toHexString(0xFF & buf[i])); 
 					    }
-					tv6.append(hexString);
+					tv1.append(hexString);
 					
 					DeviceInfo	info = new DeviceInfo (factory);
 					info.data = buf;
@@ -174,72 +167,40 @@ public class ProjectBetaActivity extends Activity {
 	        {
 				@Override
 				public void onClick(View v) {
-					tv6.setText("Starting. ");
+					clearTV();
+					tv1.setText("Starting. ");
 					
-					Command command = new Command(Command.GetDeviceInfo, session);
-
-					
+					Command command = new Command(Command.OpenSession, session, session.getNextSessionID ());
 					mConnection.bulkTransfer(mEndpointBulkOut, command.data , command.length , 1000);
-					//session.open();
-					tv6.append(" Sent:");
-					
-					StringBuffer hexString1 = new StringBuffer(); 
-					for (int i=0;i<command.data.length;i++) { 
-					    hexString1.append(Integer.toHexString(0xFF & command.data[i])); 
-					    } 
-					tv6.append(hexString1);
-					
-					byte buf[] = new byte[inMaxPS];
-					
+					session.open();				
+					byte buf[] = new byte[inMaxPS];		
 					mConnection.bulkTransfer(mEndpointBulkIn, buf ,inMaxPS , 1000);
-					
-					tv6.append(" Receiving:");
+					/*
+					tv1.append(" Receiving:");
 					StringBuffer hexString = new StringBuffer(); 
 					for (int i=0;i<buf.length;i++) { 
 					    hexString.append(Integer.toHexString(0xFF & buf[i])); 
 					    }
-					tv6.append(hexString);
+					tv1.append(hexString);
+					*/
+					Response response = new Response (buf, inMaxPS, factory);
+					tv1.setText("Type:" + response.getBlockType()+ "\n");
+					tv1.append("Name:" + response.getCodeName(response.getCode())+ "\n");
+					tv1.append("CodeString:" + response.getCodeString()+ "\n");
+					tv1.append("Length:" + response.getLength()+ "\n");
+					tv1.append("String:" +response.toString());
 					
-					DeviceInfo	info = new DeviceInfo (factory);
-					info.data = buf;
-					info.length = info.getLength();
-					info.parse();
-					if (info.vendorExtensionId != 0) {
-					    factory = factory.updateFactory (info.vendorExtensionId);
-					    info.factory = factory;
-					}
-					info.showInTextView(tv2);
-					
-					//newStuff
-					command = new Command (Command.OpenSession, session,
-			    			session.getNextSessionID ());
-					
+					command = new Command (Command.EOS_OC_Capture, session);
 					mConnection.bulkTransfer(mEndpointBulkOut, command.data , command.length , 1000);
 					
-					tv2.setText(" Sent:");
-					tv2.append(" Sent:");
-					
-					hexString1 = new StringBuffer(); 
-					for (int i=0;i<command.data.length;i++) { 
-					    hexString1.append(Integer.toHexString(0xFF & command.data[i])); 
-					    } 
-					tv2.append(hexString1);
-					
-					
 					mConnection.bulkTransfer(mEndpointBulkIn, buf ,inMaxPS , 1000);
+					response = new Response (buf, inMaxPS, factory);
 					
-					tv2.append(" Receiving:");
-					hexString = new StringBuffer(); 
-					for (int i=0;i<buf.length;i++) { 
-					    hexString.append(Integer.toHexString(0xFF & buf[i])); 
-					    }
-					tv2.append(hexString);
-					Response response = new Response (buf, inMaxPS, factory);
-					tv1.setText("Type:" + response.getBlockType()+ "\n");//= 3
-					tv1.append("Name:" + response.getCodeName(response.getCode())+ "\n");//=OK
-					tv1.append("CodeString:" + response.getCodeString()+ "\n");//=OK
-					tv1.append("Length:" + response.getLength()+ "\n");//=OK
-					tv1.append("String:" +response.toString());
+					tv2.setText("Type:" + response.getBlockType()+ "\n");
+					tv2.append("Name:" + response.getCodeName(response.getCode())+ "\n");
+					tv2.append("CodeString:" + response.getCodeString()+ "\n");
+					tv2.append("Length:" + response.getLength()+ "\n");
+					tv2.append("String:" +response.toString());
 					
 					
 				}
@@ -362,7 +323,17 @@ public class ProjectBetaActivity extends Activity {
 			    throw new IOException (response.toString ());
 		    }
 		}
-	    }	    
+	    }	
+	    
+	    public void clearTV ()
+	    {
+	    	tv1.setText("Clear");
+			tv2.setText("Clear");
+			tv3.setText("Clear");
+			tv4.setText("Clear");
+			tv5.setText("Clear");
+			tv6.setText("Clear");	    
+	    }
 	    
 
 	    
