@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+    <string name="hello">Hello World, ProjectBetaActivity!</string>
+    <string name="app_name">ProjectBeta</string>
+    <string name="Button1">Get DeviceInfo</string>
+    <string name="Button2">Detailed get DeviceInfo</string>
+    <string name="Button3">No Function</string>
+    <string name="Button4">No Function</string>
+    <string name="DefaultTV">Nothing here.</string>
+
+</resources>
