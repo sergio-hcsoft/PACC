@@ -2,7 +2,7 @@ package com.ash.beta;
 
 
 /*	
- *  Copyright 2012 by Ashraf <code@awesomeash.com>
+ *  Copyright 2012 by Ashraf <contact@hungerattack.com>
  * 
  *  This file is part of PTP Android Camera Control (PACC).
  *  
