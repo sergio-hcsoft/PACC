@@ -24,7 +24,35 @@ public class EosExtension extends NameFactory{
 	public static final int	EOS_OC_GetDevicePropValue = 		0x9127;
 	public static final int	EOS_OC_GetLiveViewPicture =			0x9153;
 	public static final int	EOS_OC_MoveFocus =					0x9155;
+	
+	/**PTP Device Properties*/
+	public static final int EOS_DPC_CameraDescription =			0xD402;
 
+	/**Non-PTP Device properties*/
+	public static final int EOS_DPC_Aperture =					0xD101;
+	public static final int EOS_DPC_ShutterSpeed =				0xD102;
+	public static final int EOS_DPC_Iso	= 						0xD103;
+	public static final int EOS_DPC_ExposureCompensation =		0xD104;
+	public static final int EOS_DPC_ShootingMode =				0xD105;
+	public static final int EOS_DPC_DriveMode =					0xD106;
+	public static final int EOS_DPC_ExpMeterringMode =			0xD107;
+	public static final int EOS_DPC_AFMode =					0xD108;
+	public static final int EOS_DPC_WhiteBalance =				0xD109;
+	public static final int EOS_DPC_PictureStyle =				0xD110;
+	public static final int EOS_DPC_TransferOption =			0xD111;
+	public static final int EOS_DPC_UnixTime =					0xD113;
+	public static final int EOS_DPC_ImageQuality =				0xD120;
+	public static final int EOS_DPC_LiveView =					0xD1B0;
+	public static final int EOS_DPC_AvailableShots =  			0xD11B;
+	public static final int EOS_DPC_CaptureDestination =   		0xD11C;
+	public static final int EOS_DPC_BracketMode =          		0xD11D;
+
+	/**Non-PTP Events*/
+	public static final int EOS_EC_DevPropChanged =				0xC189;
+	public static final int EOS_EC_ObjectCreated =				0xC181;
+	public static final int EOS_EC_DevPropValuesAccepted =		0xC18A;
+	public static final int EOS_EC_Capture =					0xC18B;
+	public static final int EOS_EC_HalfPushReleaseButton =		0xC18E;
     public String getOpcodeString (int code)
     {
 	switch (code) {
@@ -110,7 +138,7 @@ public class EosExtension extends NameFactory{
 
     /*-------------------------------------------------------------*/
 
-    public static final int EOS_DPC_CameraDescription = 			0xD402;
+
     /** Property code: */
     public static final int prop1 = 0xd001;
 

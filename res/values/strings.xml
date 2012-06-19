@@ -2,11 +2,17 @@
 <resources>
 
     <string name="hello">Hello World, ProjectBetaActivity!</string>
-    <string name="app_name">ProjectBeta</string>
-    <string name="Button1">Get DeviceInfo</string>
-    <string name="Button2">Detailed get DeviceInfo</string>
-    <string name="Button3">No Function</string>
-    <string name="Button4">No Function</string>
+    <string name="app_name">Camera Controller</string>
+    <string name="Button1">Clear Text View</string>
+    <string name="Button2">Get DeviceInfo</string>
+    <string name="Button3">Take Picture</string>
+    <string name="Button4">Open Session</string>
+    <string name="Button5">Close Session</string>
+    <string name="Button6">Read BulkIn</string>
+    <string name="Button7">Get Live</string>
+    <string name="Button8">Get Events/Interrupt</string>
     <string name="DefaultTV">Nothing here.</string>
+    <string name="Controller">Nothing here.</string>
+    
 
 </resources>

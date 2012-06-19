@@ -293,7 +293,26 @@ public class DeviceInfo extends Data
 	tv.setText("DeviceInfo: ");
 	tv.append  ("\n");
 	
-
+	if (manufacturer != null)
+	{
+		tv.append ("Manufacturer: " + manufacturer);
+		tv.append  ("\n");
+	}
+	if (model != null)
+	{
+		tv.append ("Model: " + model);
+		tv.append  ("\n");
+	}
+	if (deviceVersion != null)
+	{
+		tv.append ("Device Version: " + deviceVersion);
+		tv.append  ("\n");
+	}
+	if (serialNumber != null)
+	{
+		tv.append ("Serial Number: " + serialNumber);	
+		tv.append  ("\n");
+	}
 	tv.append("PTP Version: "
 	    + (standardVersion / 100)
 	    + "."

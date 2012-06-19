@@ -87,6 +87,7 @@ abstract public class Container extends Buffer
 	temp.append (Integer.toString (getXID ()));
 
 	// inelegant, but ...
+	/*
 	if (this instanceof ParamVector) {
 	    ParamVector	vec = (ParamVector) this;
 	    int		nparams = vec.getNumParams ();
@@ -100,6 +101,17 @@ abstract public class Container extends Buffer
 		    temp.append (Integer.toHexString (vec.getParam (i)));
 		}
 	    }
+	}*/
+	if (this instanceof ParamVector) {
+		int		nparams = getLength (); //vec.getNumParams ();
+		if (nparams > 0) {
+			temp.append ("; \n");		
+			for (int i = 0; i < nparams; i++) {
+				if (i != 0)
+					temp.append (" ");
+				temp.append (String.format("%02x", getU8(i))); 
+			}
+		}
 	}
 
 	temp.append (" }");

@@ -2,7 +2,7 @@ package com.ash.beta;
 
 
 /*	
- *  Copyright 2012 by Ashraf <contact@hungerattack.com>
+ *  Copyright 2012 by Ashraf <android@hungerattack.com>
  * 
  *  This file is part of PTP Android Camera Control (PACC).
  *  
@@ -54,38 +54,17 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 public class ProjectBetaActivity extends Activity {
-
-
-		private static final String ACTION_USB_PERMISSION = "com.test.hello.USB_PERMISSION";
-		private static final String TAG = "TestRunActivity";
-
-		private Thread thread;
-		private Toast toast;
-		
-		
+	
 		private UsbManager mUsbManager;
 	    private UsbDevice mDevice;
 	    
-	    private UsbDeviceConnection mConnection;
-	    private UsbInterface intf;
-	    private UsbEndpoint mEndpointBulkIn;
-	    private UsbEndpoint mEndpointBulkOut;
-	    private UsbEndpoint mEndpointIntr;
-	    private UsbRequest mRequest;
-	    private Session session;
 	    
-	    private static final byte CLASS_CANCEL_REQ = (byte) 0x64;
-	    private static final byte CLASS_GET_EVENT_DATA = (byte) 0x65;
-	    private static final byte CLASS_DEVICE_RESET = (byte) 0x66;
-	    private static final byte CLASS_GET_DEVICE_STATUS = (byte) 0x67;
-	    
+	    private UsbConnection usbconnection;
 	    private NameFactory factory = new NameFactory();
-	    
-	    private int inMaxPS;
-	    private Byte[] bytes;
+
 
 		
-	    Button button1, button2, button3, button4;
+	    Button button1, button2, button3, button4, button5, button6, button7, button8;
 		TextView tv1, tv2, tv3, tv4, tv5, tv6;
 		UsbDevice usbCamera;
 
@@ -95,9 +74,7 @@ public class ProjectBetaActivity extends Activity {
 	    public void onCreate(Bundle savedInstanceState) {
 	        super.onCreate(savedInstanceState);
 	        setContentView(R.layout.main);
-	       
-	        mUsbManager = (UsbManager)getSystemService(Context.USB_SERVICE);
-	      
+
 	        tv1 = (TextView) findViewById(R.id.tv1);
 	        tv2 = (TextView) findViewById(R.id.tv2);
 	        tv3 = (TextView) findViewById(R.id.tv3);
@@ -108,13 +85,35 @@ public class ProjectBetaActivity extends Activity {
 	        button2 = (Button) findViewById (R.id.button2);
 	        button3 = (Button) findViewById (R.id.button3);
 	        button4 = (Button) findViewById (R.id.button4);
+	        button5 = (Button) findViewById (R.id.button5);
+	        button6 = (Button) findViewById (R.id.button6);
+	        button7 = (Button) findViewById (R.id.button7);
+	        button8 = (Button) findViewById (R.id.button8);
+	        //////////////////OnResume
+
+	        mUsbManager = (UsbManager)getSystemService(Context.USB_SERVICE);	        
+	        Intent intent = getIntent();
+	        String action = intent.getAction();
+
+	        UsbDevice device = (UsbDevice)intent.getParcelableExtra(UsbManager.EXTRA_DEVICE);
+	        mDevice = device;
 	        
+	        if (UsbManager.ACTION_USB_DEVICE_ATTACHED.equals(action)) {
+	        	usbconnection = new UsbConnection(mUsbManager, mDevice, factory);
+	        	usbconnection.setTV(tv1, tv2, tv3, tv4, tv5, tv6);
+   
+	        } else if (UsbManager.ACTION_USB_DEVICE_DETACHED.equals(action)) {
+	            if (mDevice != null && mDevice.equals(device)) {
+	                //setDevice(null);
+	            }
+	        }
+	        
+	        ///////////////////////////
 	        button1.setOnClickListener(new View.OnClickListener() 
 	        {
 				@Override
 				public void onClick(View v) {
-					// TODO Auto-generated method stub
-					tv3.setText("Button Works");
+					clearTV();
 
 				}
 			});
@@ -123,42 +122,10 @@ public class ProjectBetaActivity extends Activity {
 				@Override
 				public void onClick(View v) {
 					clearTV();
-					tv1.setText("Starting. ");
-					Command command = new Command(Command.GetDeviceInfo, session);
-					mConnection.bulkTransfer(mEndpointBulkOut, command.data , command.length , 1000);
-					tv1.append(" Sent:");
-					
-					StringBuffer hexString1 = new StringBuffer(); 
-					for (int i=0;i<command.data.length;i++) { 
-					    hexString1.append(Integer.toHexString(0xFF & command.data[i])); 
-					    } 
-					tv1.append(hexString1);
-					byte buf[] = new byte[inMaxPS];					
-					mConnection.bulkTransfer(mEndpointBulkIn, buf ,inMaxPS , 1000);
-					
-					tv1.append(" Receiving:");
-					StringBuffer hexString = new StringBuffer(); 
-					for (int i=0;i<buf.length;i++) { 
-					    hexString.append(Integer.toHexString(0xFF & buf[i])); 
-					    }
-					tv1.append(hexString);
-					
-					DeviceInfo	info = new DeviceInfo (factory);
-					info.data = buf;
-					info.length = info.getLength();
-					info.parse();
-					if (info.vendorExtensionId != 0) {
-					    factory = factory.updateFactory (info.vendorExtensionId);
-					    info.factory = factory;
-					}
-					info.showInTextView(tv2);
-					
-					
-					
-					
-					
-					
-				
+					usbconnection.openSession();
+					factory = usbconnection.getDeviceInfo(tv6);
+					usbconnection.closeSession();
+
 					
 				}
 			});
@@ -168,58 +135,57 @@ public class ProjectBetaActivity extends Activity {
 				@Override
 				public void onClick(View v) {
 					clearTV();
-					tv1.setText("Starting. ");
-					
-					Command command = new Command(Command.OpenSession, session, session.getNextSessionID ());
-					mConnection.bulkTransfer(mEndpointBulkOut, command.data , command.length , 1000);
-					session.open();				
-					byte buf[] = new byte[inMaxPS];		
-					mConnection.bulkTransfer(mEndpointBulkIn, buf ,inMaxPS , 1000);
-					/*
-					tv1.append(" Receiving:");
-					StringBuffer hexString = new StringBuffer(); 
-					for (int i=0;i<buf.length;i++) { 
-					    hexString.append(Integer.toHexString(0xFF & buf[i])); 
-					    }
-					tv1.append(hexString);
-					*/
-					Response response = new Response (buf, inMaxPS, factory);
-					tv1.setText("Type:" + response.getBlockType()+ "\n");
-					tv1.append("Name:" + response.getCodeName(response.getCode())+ "\n");
-					tv1.append("CodeString:" + response.getCodeString()+ "\n");
-					tv1.append("Length:" + response.getLength()+ "\n");
-					tv1.append("String:" +response.toString());
-					
-					command = new Command (Command.EOS_OC_Capture, session);
-					mConnection.bulkTransfer(mEndpointBulkOut, command.data , command.length , 1000);
-					
-					mConnection.bulkTransfer(mEndpointBulkIn, buf ,inMaxPS , 1000);
-					response = new Response (buf, inMaxPS, factory);
-					
-					tv2.setText("Type:" + response.getBlockType()+ "\n");
-					tv2.append("Name:" + response.getCodeName(response.getCode())+ "\n");
-					tv2.append("CodeString:" + response.getCodeString()+ "\n");
-					tv2.append("Length:" + response.getLength()+ "\n");
-					tv2.append("String:" +response.toString());
-					
-					
+					usbconnection.openSession();
+					usbconnection.captureImage();
+					usbconnection.closeSession();
+	
 				}
 			}); 
 	        
 	        button4.setOnClickListener(new View.OnClickListener() 
 	        {
 				@Override
-				public void onClick(View v) {
+				public void onClick(View v) {	 
+					usbconnection.openSession();
 					
-					
-					
-
-			    	
 					
 				}
 			}); 
-	    
+	        button5.setOnClickListener(new View.OnClickListener() 
+	        {
+				@Override
+				public void onClick(View v) {	 
+					usbconnection.closeSession();
 
+					
+				}
+			});
+	        button6.setOnClickListener(new View.OnClickListener() 
+	        {
+				@Override
+				public void onClick(View v) {	 
+					tv5.setText("Reading: \n");
+					Response response = usbconnection.readResponse(tv5);
+					
+				}
+			});	        
+	        button7.setOnClickListener(new View.OnClickListener() 
+	        {
+				@Override
+				public void onClick(View v) {	 
+					usbconnection.getLiveView();
+					
+				}
+			});
+	        button8.setOnClickListener(new View.OnClickListener() 
+	        {
+				@Override
+				public void onClick(View v) {	 
+					usbconnection.getEvent();
+					
+				}
+			});
+	        
 	}
 	    
 
@@ -229,102 +195,11 @@ public class ProjectBetaActivity extends Activity {
 	    @Override
 	    public void onResume() {
 	        super.onResume();
-	        Intent intent = getIntent();
-	        String action = intent.getAction();
-
-	        UsbDevice device = (UsbDevice)intent.getParcelableExtra(UsbManager.EXTRA_DEVICE);
-	        if (UsbManager.ACTION_USB_DEVICE_ATTACHED.equals(action)) {
-	        	session = new Session();
-	        	mDevice = device;
-				setDevice(device);
-	            setDevice2(device);
-	            
-	            
-	        } else if (UsbManager.ACTION_USB_DEVICE_DETACHED.equals(action)) {
-	            if (mDevice != null && mDevice.equals(device)) {
-	                //setDevice(null);
-	            }
-	        }
-	        
-	        
 	     
 	        
 	    }
 	    
-	    private void setDevice(UsbDevice device) {
-	    	tv2.setText("N:"+device.getDeviceName() + " P:" +device.getProductId() + " V:"+ device.getVendorId());
-	        tv3.setText("Pro:"+device.getDeviceProtocol()+" Sub:"+device.getDeviceSubclass());
-	        
-	    }
-	    
-	    private void setDevice2(UsbDevice device){
-
-	    	mConnection = mUsbManager.openDevice(mDevice); 
-	    	//mConnection.claimInterface(intf, true);//cannot use claimInterface. Why ah? -Ash
-	    	intf = mDevice.getInterface(0);
-	    	UsbRequest intrRequest = new UsbRequest();
-	    	UsbEndpoint epOut = null;
-	        UsbEndpoint epIn = null;
-	        UsbEndpoint epEv = null;
-	        // look for our bulk endpoints
-	        for (int i = 0; i < intf.getEndpointCount(); i++) {
-	            UsbEndpoint ep = intf.getEndpoint(i);
-	            if (ep.getType() == UsbConstants.USB_ENDPOINT_XFER_BULK) {
-	                if (ep.getDirection() == UsbConstants.USB_DIR_OUT) {
-	                    epOut = ep;
-	                } else {
-	                    epIn = ep;
-	                }
-	            }
-	            if (ep.getType() == UsbConstants.USB_ENDPOINT_XFER_INT){
-	            		epEv = ep;
-	            }
-	        }
-	        if (epOut == null || epIn == null || epEv == null) {
-	            throw new IllegalArgumentException("not all endpoints found");
-	        }
-	               
-	        mEndpointBulkOut = epOut;
-	        mEndpointBulkIn = epIn;
-	        mEndpointIntr = epEv;
-	        inMaxPS = mEndpointBulkOut.getMaxPacketSize();
-	        intrRequest.initialize(mConnection, mEndpointIntr);
-	        //intrRequest
-	        //mConnection.controlTransfer(CLASS_GET_DEVICE_STATUS, CLASS_GET_DEVICE_STATUS, value, index, buffer, length, timeout)
-
-	        tv4.setText("Get:"+mDevice.getInterfaceCount()+"Other:"+mDevice.getDeviceName()+" Class:"+intf.getInterfaceClass()+","+intf.getInterfaceSubclass()+","+intf.getInterfaceProtocol()+ "Iendpoints:"+mEndpointBulkIn.getMaxPacketSize()+ " "+ mEndpointBulkIn.getType() + " "+mEndpointBulkIn.getDirection()); //512 2 USB_ENDPOINT_XFER_BULK USB_DIR_IN 
-	        tv4.append(" Oendpoints:"+mEndpointBulkOut.getMaxPacketSize()+ " "+ mEndpointBulkOut.getType() + " "+mEndpointBulkOut.getDirection()); //512 2 USB_ENDPOINT_XFER_BULK USB_DIR_OUT 
-	        tv4.append(" Eendpoints:"+mEndpointIntr.getMaxPacketSize()+ " "+ mEndpointIntr.getType() + " "+mEndpointIntr.getDirection()); //8,3 USB_ENDPOINT_XFER_INT USB_DIR_IN  
-
-	        
-
-	    }
-	    
-	    public void openSession (TextView tv4)
-	    throws IOException
-	    {
-		Command		command;
-		Response	response;
-
-		synchronized (session) {
-		    command = new Command (Command.OpenSession, session,
-		    			session.getNextSessionID ());
-		    
-		    mConnection.bulkTransfer(mEndpointBulkOut, command.data , command.length , 1000);
-		    byte buf[] = new byte[inMaxPS];			
-			mConnection.bulkTransfer(mEndpointBulkIn, buf ,inMaxPS , 1000);
-			response = new Response (buf, inMaxPS, factory);
-		    switch (response.getCode ()) {
-			case Response.OK:
-			    session.open();
-			    tv4.append("Session Opened!");
-			    return;
-			default:
-			    throw new IOException (response.toString ());
-		    }
-		}
-	    }	
-	    
+	       
 	    public void clearTV ()
 	    {
 	    	tv1.setText("Clear");
